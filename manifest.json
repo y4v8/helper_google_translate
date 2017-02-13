@@ -1,0 +1,22 @@
+{
+  "manifest_version": 2,
+  "name": "A helper for Google Translate",
+  "version": "1.0",
+  "description": "Sends the selected text into a \"Google Translate\" page by pressed the CTRL key.",
+  "homepage_url": "https://github.com/y4v8/helper_google_translate",
+
+  "permissions": [
+    "tabs"
+  ],
+
+  "background": {
+    "scripts": ["background.js"]
+  },
+
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content-script.js"]
+    }
+  ]
+}
