@@ -1,5 +1,5 @@
 # helper_google_translate
 
-## What it does
-
-Sends the selected text into a "Google Translate" page by pressed the CTRL key.
+To translate selected text press the CTRL key.  
+Translation is performed in a separate window or tab.  
+To return to the previous tab press the CTRL key.  
