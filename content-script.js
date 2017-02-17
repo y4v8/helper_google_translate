@@ -1,4 +1,5 @@
-const extensionID = '{e2652cfc-37d0-4d74-a4f7-a56812392073}',
+const firefoxExtensionID = '{e2652cfc-37d0-4d74-a4f7-a56812392073}',
+      chromeExtensionID = '{?}',
       translateURL = 'https://translate.google.com/',
       portName = 'translate-port',
       contentSourceID = 'source',
@@ -6,15 +7,15 @@ const extensionID = '{e2652cfc-37d0-4d74-a4f7-a56812392073}',
       eventMaxDuration = 500;
 
 let translate = document.URL.startsWith(translateURL);
-let portBS = browser.runtime.connect({
+let portBS = chrome.runtime.connect({
   name: portName
 });
 let eventKeyTime,
     eventKeyDown = false;
 
 if (translate) {
-  browser.runtime.onMessage.addListener((msg, sender, resp) => {
-    if (sender.extensionId != extensionID) {
+  chrome.runtime.onMessage.addListener((msg, sender, resp) => {
+    if (sender.extensionId != firefoxExtensionID && "content" in msg == false /* sender.extensionId != chromeExtensionID */) {
       return;
     }
     let source = document.getElementById(contentSourceID);

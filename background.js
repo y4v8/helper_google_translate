@@ -3,15 +3,15 @@ const translateURL = 'https://translate.google.com/',
 
 let lastContentTab;
 
-function translateTab(tabs, currentWindow, currentTab) {
+function translateTab(tabs, currentWindow, currentTab, callback) {
   if (tabs.length == 0) {
-    let pTab = browser.tabs.create({
+    chrome.tabs.create({
       active: true,
       index: currentTab.index + 1,
       url: translateURL,
       windowId: currentWindow.index
-    });
-    return pTab;
+    }, callback);
+    return;
   }
 
   let tab;
@@ -20,10 +20,10 @@ function translateTab(tabs, currentWindow, currentTab) {
     otherWindowTabs = tabs.filter(t => t.index == currentTab.index + 1);
     if (otherWindowTabs.length == 0) {
       let index = tabs[0].index < currentTab.index ? currentTab.index : currentTab.index + 1;
-      let pTab = browser.tabs.move(tabs[0].id, {
+      chrome.tabs.move(tabs[0].id, {
         index: index
-      });
-      return pTab;
+      }, callback);
+      return;
     }
     tab = otherWindowTabs[0];
   } else {
@@ -34,39 +34,30 @@ function translateTab(tabs, currentWindow, currentTab) {
       tab = activeTabs[0];
     }
   }
-
-  let pTab = new Promise((resolve, reject) => {
-    resolve(tab);
-  });
-
-  return pTab;
+  
+  callback(tab);
 }
 
 function postMessage(m) {
-  let pCurrentWindow = browser.windows.getCurrent();
-  pCurrentWindow.then(currentWindow => {
-    let pActiveTabs = browser.tabs.query({
+  chrome.windows.getCurrent(currentWindow => {
+    chrome.tabs.query({
       windowId: currentWindow.Id,
       active: true
-    });
-    pActiveTabs.then(activeTabs => {
+    }, activeTabs => {
       if (activeTabs.length == 0) {
         return;
       }
       lastContentTab = activeTabs[0];
 
-      let pTabs = browser.tabs.query({
+      chrome.tabs.query({
         url: translateURL + '*'
-      });
-      pTabs.then(tabs => {
-        let pTab = translateTab(tabs, currentWindow, activeTabs[0]);
-        pTab.then(tab => {
+      }, tabs => {
+        translateTab(tabs, currentWindow, activeTabs[0], tab => {
           let t = Array.isArray(tab) ? tab[0] : tab;
-          let pUpdateTab = browser.tabs.update(t.id, {
+          chrome.tabs.update(t.id, {
             active: true
-          });
-          pUpdateTab.then(updateTab => {
-            browser.tabs.sendMessage(updateTab.id, m);
+          }, updateTab => {
+            chrome.tabs.sendMessage(updateTab.id, m);
           });
         });
       });
@@ -83,7 +74,7 @@ function connected(p) {
       postMessage(m);
     } else {
       if (lastContentTab != undefined) {
-        browser.tabs.update(lastContentTab.id, {
+        chrome.tabs.update(lastContentTab.id, {
           active: true
         });
       }
@@ -91,4 +82,4 @@ function connected(p) {
   });
 }
 
-browser.runtime.onConnect.addListener(connected);
+chrome.runtime.onConnect.addListener(connected);
