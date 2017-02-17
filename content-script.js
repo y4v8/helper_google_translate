@@ -1,19 +1,26 @@
-const translate_url = 'https://translate.google.com/',
-      port_name = 'translate-port',
-      content_source_id = 'source',
-      event_key = 'Control',
-      wait_max = 500;
+const extensionID = '{e2652cfc-37d0-4d74-a4f7-a56812392073}',
+      translateURL = 'https://translate.google.com/',
+      portName = 'translate-port',
+      contentSourceID = 'source',
+      eventKey = 'Control',
+      eventMaxDuration = 500;
 
-let translate = document.URL.startsWith(translate_url);
+let translate = document.URL.startsWith(translateURL);
 let portBS = browser.runtime.connect({
-  name: port_name
+  name: portName
 });
-let event_key_time,
-    event_key_down = false;
+let eventKeyTime,
+    eventKeyDown = false;
 
 if (translate) {
   browser.runtime.onMessage.addListener((msg, sender, resp) => {
-    let source = document.getElementById(content_source_id);
+    if (sender.extensionId != extensionID) {
+      return;
+    }
+    let source = document.getElementById(contentSourceID);
+    if (source == undefined) {
+      return;
+    }
     source.value = msg.content;
     source.style.height = 'auto';
     source.style.height = source.scrollHeight+'px';
@@ -21,24 +28,24 @@ if (translate) {
 }
 
 document.addEventListener('keydown', (event) => {
-  if (event.key === event_key) {
-    if (event_key_down == false) {
-      event_key_time = new Date();
-      event_key_down = true;
+  if (event.key === eventKey) {
+    if (eventKeyDown == false) {
+      eventKeyTime = new Date();
+      eventKeyDown = true;
     }
     return;
   }
-  event_key_down = false;
+  eventKeyDown = false;
 });
 
 document.addEventListener('keyup', (event) => {
-  if (event.key !== event_key || event_key_down == false) {
+  if (event.key !== eventKey || eventKeyDown == false) {
     return;
   }
-  event_key_down = false;
+  eventKeyDown = false;
 
   let now = new Date();
-  if (now - event_key_time > wait_max) {
+  if (now - eventKeyTime > eventMaxDuration) {
     return;
   }
 

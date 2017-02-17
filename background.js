@@ -1,73 +1,72 @@
-const translate_url = 'https://translate.google.com/',
-      translate_port_name = 'translate-port';
+const translateURL = 'https://translate.google.com/',
+      portName = 'translate-port';
 
 let lastContentTab;
 
-function translateTab(tabs, current_window, current_tab) {
-  let p_tab, tab;
-
+function translateTab(tabs, currentWindow, currentTab) {
   if (tabs.length == 0) {
-    p_tab = browser.tabs.create({
+    let pTab = browser.tabs.create({
       active: true,
-      index: current_tab.index + 1,
-      url: translate_url,
-      windowId: current_window.index
+      index: currentTab.index + 1,
+      url: translateURL,
+      windowId: currentWindow.index
     });
-    return p_tab;
+    return pTab;
   }
 
-  let f_tabs = tabs.filter(t => t.windowId != current_window.id);
-  if (f_tabs.length == 0) {
-    f_tabs = tabs.filter(t => t.index == current_tab.index + 1);
-    if (f_tabs.length == 0) {
-      let index = tabs[0].index < current_tab.index ? current_tab.index : current_tab.index + 1;
-      p_tab = browser.tabs.move(tabs[0].id, {
+  let tab;
+  let otherWindowTabs = tabs.filter(t => t.windowId != currentWindow.id);
+  if (otherWindowTabs.length == 0) {
+    otherWindowTabs = tabs.filter(t => t.index == currentTab.index + 1);
+    if (otherWindowTabs.length == 0) {
+      let index = tabs[0].index < currentTab.index ? currentTab.index : currentTab.index + 1;
+      let pTab = browser.tabs.move(tabs[0].id, {
         index: index
       });
-      return p_tab;
+      return pTab;
     }
-    tab = f_tabs[0];
+    tab = otherWindowTabs[0];
   } else {
-    let a_tabs = f_tabs.filter(t => t.active);
-    if (a_tabs.length == 0) {
-      tab = f_tabs[0];
+    let activeTabs = otherWindowTabs.filter(t => t.active);
+    if (activeTabs.length == 0) {
+      tab = otherWindowTabs[0];
     } else {
-      tab = a_tabs[0];
+      tab = activeTabs[0];
     }
   }
 
-  p_tab = new Promise((resolve, reject) => {
+  let pTab = new Promise((resolve, reject) => {
     resolve(tab);
   });
 
-  return p_tab;
+  return pTab;
 }
 
 function postMessage(m) {
-  let p_current_window = browser.windows.getCurrent();
-  p_current_window.then(current_window => {
-    let p_active_tabs = browser.tabs.query({
-      windowId: current_window.Id,
+  let pCurrentWindow = browser.windows.getCurrent();
+  pCurrentWindow.then(currentWindow => {
+    let pActiveTabs = browser.tabs.query({
+      windowId: currentWindow.Id,
       active: true
     });
-    p_active_tabs.then(active_tabs => {
-      if (active_tabs.length == 0) {
+    pActiveTabs.then(activeTabs => {
+      if (activeTabs.length == 0) {
         return;
       }
-      lastContentTab = active_tabs[0];
+      lastContentTab = activeTabs[0];
 
-      let p_tabs = browser.tabs.query({
-        url: translate_url + '*'
+      let pTabs = browser.tabs.query({
+        url: translateURL + '*'
       });
-      p_tabs.then(tabs => {
-        let p_tab = translateTab(tabs, current_window, active_tabs[0]);
-        p_tab.then(tab => {
+      pTabs.then(tabs => {
+        let pTab = translateTab(tabs, currentWindow, activeTabs[0]);
+        pTab.then(tab => {
           let t = Array.isArray(tab) ? tab[0] : tab;
-          let u_tab = browser.tabs.update(t.id, {
+          let pUpdateTab = browser.tabs.update(t.id, {
             active: true
           });
-          u_tab.then(u => {
-            browser.tabs.sendMessage(u.id, m);
+          pUpdateTab.then(updateTab => {
+            browser.tabs.sendMessage(updateTab.id, m);
           });
         });
       });
@@ -76,7 +75,7 @@ function postMessage(m) {
 }
 
 function connected(p) {
-  if (p.name != translate_port_name) {
+  if (p.name != portName) {
     return;
   }
   p.onMessage.addListener(function(m) {
