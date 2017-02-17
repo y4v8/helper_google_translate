@@ -1,20 +1,20 @@
-const extensionID = '{e2652cfc-37d0-4d74-a4f7-a56812392073}',
-      translateURL = 'https://translate.google.com/',
+const translateURL = 'https://translate.google.com/',
       portName = 'translate-port',
       contentSourceID = 'source',
       eventKey = 'Control',
       eventMaxDuration = 500;
 
 let translate = document.URL.startsWith(translateURL);
-let portBS = browser.runtime.connect({
+let portBS = chrome.runtime.connect({
   name: portName
 });
 let eventKeyTime,
     eventKeyDown = false;
 
 if (translate) {
-  browser.runtime.onMessage.addListener((msg, sender, resp) => {
-    if (sender.extensionId != extensionID) {
+  chrome.runtime.onMessage.addListener((msg, sender, resp) => {
+    let id = 'extensionId' in sender ? sender.extensionId : sender.id;
+    if (id != chrome.runtime.id) {
       return;
     }
     let source = document.getElementById(contentSourceID);
@@ -27,7 +27,7 @@ if (translate) {
   });
 }
 
-document.addEventListener('keydown', (event) => {
+document.addEventListener('keydown', event => {
   if (event.key === eventKey) {
     if (eventKeyDown == false) {
       eventKeyTime = new Date();
@@ -38,7 +38,7 @@ document.addEventListener('keydown', (event) => {
   eventKeyDown = false;
 });
 
-document.addEventListener('keyup', (event) => {
+document.addEventListener('keyup', event => {
   if (event.key !== eventKey || eventKeyDown == false) {
     return;
   }
