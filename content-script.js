@@ -1,6 +1,7 @@
 const translateURL = 'https://translate.google.com/',
       portName = 'translate-port',
       contentSourceID = 'source',
+      menuSourceID = 'gt-src-is',
       eventKey = 'Control',
       eventMaxDuration = 500;
 
@@ -10,20 +11,45 @@ let portBS = chrome.runtime.connect({
 });
 let eventTimeDown,
     eventKeyDown = false;
-
+    
 if (translate) {
+  initTranslator();
+}
+
+function initTranslator() {
+  let source = document.getElementById(contentSourceID);
+  let menu = document.getElementById(menuSourceID);
+  
+  if (menu == undefined || source == undefined) {
+    return;
+  }
+
+  let content = '';
+  
+  let obs = new MutationObserver(function(mutations) {
+    if (menu.style.display == '' && source.value == content) {
+      let focus = document.activeElement == source;
+      source.focus();
+      source.blur();
+      if (focus) {
+        source.focus();
+      }
+    }
+  });
+  obs.observe(menu, { attributes: true, attributeFilter: ['style'] });
+  
   chrome.runtime.onMessage.addListener(function(msg, sender, resp) {
     let id = 'extensionId' in sender ? sender.extensionId : sender.id;
     if (id != chrome.runtime.id) {
       return;
     }
-    let source = document.getElementById(contentSourceID);
-    if (source == undefined) {
-      return;
-    }
+
+    content = msg.content;
+
     source.value = msg.content;
     source.style.height = 'auto';
     source.style.height = source.scrollHeight+'px';
+    source.focus();
   });
 }
 
@@ -66,10 +92,10 @@ function eventKeyup(event) {
   }
 
   let data;
-  if (event.target == document.body) {
-    data = window.getSelection().toString().trim();
-  } else {
+  if (event.target.type == 'textarea') {
     data = event.target.value.substring(event.target.selectionStart, event.target.selectionEnd).trim();
+  } else {
+    data = window.getSelection().toString().trim();
   }
   if (data != '') {
     portBS.postMessage({
@@ -87,7 +113,7 @@ for (let i=0; i<elements.length; i++) {
   elements[i].addEventListener('keyup', eventKeyup);
 }
 
-var observer = new MutationObserver(function(mutations) {
+let observer = new MutationObserver(function(mutations) {
   mutations.forEach(function(mutation) {
     mutation.addedNodes.forEach(function(node) {
       if (node.type == 'textarea') {
@@ -104,6 +130,6 @@ var observer = new MutationObserver(function(mutations) {
   });    
 });
 
-var config = { childList: true, subtree: true };
+let config = { childList: true, subtree: true };
 
 observer.observe(document.body, config);
