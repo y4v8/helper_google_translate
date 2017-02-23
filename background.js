@@ -92,11 +92,15 @@ function connected(p) {
 
 chrome.runtime.onConnect.addListener(connected);
 
-chrome.contextMenus.create({
-  id: 'hgt-translate',
-  title: 'Translate',
-  contexts: ['all'],
-  onclick: function(info, tab) {
-    chrome.tabs.sendMessage(tab.id, {});
+chrome.storage.local.get('showMenu', items => {
+  if (items.showMenu) {
+    chrome.contextMenus.create({
+      id: 'hgt-translate',
+      title: 'Translate',
+      contexts: ['all'],
+      onclick: function(info, tab) {
+        chrome.tabs.sendMessage(tab.id, {});
+      }
+    });
   }
 });

@@ -1,13 +1,14 @@
 {
   "manifest_version": 2,
   "name": "A helper for Google Translate",
-  "version": "2.1.0",
+  "version": "2.1.1",
   "description": "Translation of selected text by pressing the CTRL key.",
   "homepage_url": "https://github.com/y4v8/helper_google_translate",
 
   "permissions": [
     "tabs",
-    "contextMenus"
+    "contextMenus",
+    "storage"
   ],
 
   "background": {
@@ -19,5 +20,7 @@
       "matches": ["<all_urls>"],
       "js": ["content-script.js"]
     }
-  ]
+  ],
+
+  "options_ui": { "page": "options.html" }
 }
