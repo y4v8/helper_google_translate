@@ -13,10 +13,55 @@ let eventTimeDown,
     eventKeyDown = false;
     
 if (translate) {
-  initTranslator();
+  initTranslatorTab();
+} else {
+  initContentTab();
 }
 
-function initTranslator() {
+function initContentTab() {
+  chrome.runtime.onMessage.addListener(contentListener);
+}
+
+function contentListener(msg, sender, resp) {
+  let id = 'extensionId' in sender ? sender.extensionId : sender.id;
+  if (id != chrome.runtime.id) {
+    return;
+  }
+
+  function append(element) {
+    var head = document.getElementsByTagName("head")[0];
+    head || (head = document.body.parentNode.appendChild(document.createElement("head")));
+    head.appendChild(element);
+  }
+  
+  function loadJs(src) {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.charset = "UTF-8";
+    script.src = src;
+    append(script);
+  }
+  
+  function insertJs(data) {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.innerHTML = data;
+    append(script);
+  }
+  
+  insertJs(`
+  function googleTranslateElementInit() {
+    var translator = new google.translate.TranslateElement({ pageLanguage: 'en', layout: google.translate.TranslateElement.InlineLayout.SIMPLE, multilanguagePage: true } );
+    setTimeout(function() { translator.showBanner(true); }, 100);
+  }`);
+  
+  let url = translateURL + 'translate_a/element.js?cb=googleTranslateElementInit&hl=' + chrome.i18n.getUILanguage();
+  loadJs(url);
+
+  chrome.runtime.onMessage.removeListener(contentListener);  
+}
+
+function initTranslatorTab() {
   let source = document.getElementById(contentSourceID);
   let menu = document.getElementById(menuSourceID);
   

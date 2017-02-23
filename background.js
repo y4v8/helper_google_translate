@@ -52,7 +52,15 @@ function postMessage(m) {
       chrome.tabs.query({
         url: translateURL + '*'
       }, tabs => {
-        translateTab(tabs, currentWindow, activeTabs[0], tab => {
+        let filteredTabs = tabs.filter(t => {
+          if (t.url == translateURL) {
+            return true;
+          }
+          let pathBegin = t.url[translateURL.length];
+          return pathBegin == '?' || pathBegin == '#';
+        });
+        
+        translateTab(filteredTabs, currentWindow, activeTabs[0], tab => {
           let t = Array.isArray(tab) ? tab[0] : tab;
           chrome.tabs.update(t.id, {
             active: true
@@ -83,3 +91,12 @@ function connected(p) {
 }
 
 chrome.runtime.onConnect.addListener(connected);
+
+chrome.contextMenus.create({
+  id: 'hgt-translate',
+  title: 'Translate',
+  contexts: ['all'],
+  onclick: function(info, tab) {
+    chrome.tabs.sendMessage(tab.id, {});
+  }
+});
