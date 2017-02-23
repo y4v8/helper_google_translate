@@ -53,23 +53,10 @@ function initTranslator() {
   });
 }
 
-function eventActive() {
-  if (eventKeyDown == false) {
-    return false;
-  }
-  
-  let now = new Date();
-  if (now - eventTimeDown > eventMaxDuration) {
-    return false;
-  }
-  
-  return true;
-}
-
 function eventKeydown(event) {
   if (event.key === eventKey) {
     if (eventKeyDown == false) {
-      eventTimeDown = new Date();
+      eventTimeDown = event.timeStamp;
       eventKeyDown = true;
     }
     return;
@@ -78,9 +65,12 @@ function eventKeydown(event) {
 }
 
 function eventKeyup(event) {
-  let active = eventActive();
+  if (eventKeyDown == false) {
+    return;
+  }
   eventKeyDown = false;
-  if (active == false) {
+  
+  if (event.timeStamp - eventTimeDown > eventMaxDuration) {
     return;
   }
   
