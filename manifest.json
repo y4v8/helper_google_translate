@@ -1,7 +1,7 @@
 {
   "manifest_version": 2,
   "name": "A helper for Google Translate",
-  "version": "2.1.1",
+  "version": "2.1.2",
   "description": "Translation of selected text by pressing the CTRL key.",
   "homepage_url": "https://github.com/y4v8/helper_google_translate",
 
@@ -22,5 +22,13 @@
     }
   ],
 
-  "options_ui": { "page": "options.html" }
+  "options_ui": {
+    "page": "options.html"
+  },
+
+  "applications": {
+    "gecko": {
+      "id": "{e2652cfc-37d0-4d74-a4f7-a56812392073}"
+    }
+  }
 }
