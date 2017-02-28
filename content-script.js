@@ -3,7 +3,7 @@ const translateURL = 'https://translate.google.com/',
       contentSourceID = 'source',
       menuSourceID = 'gt-src-is',
       eventKey = 'Control',
-      eventMaxDuration = 500;
+      eventMaxDuration = 250;
 
 let translate = document.URL.startsWith(translateURL);
 let portBS = chrome.runtime.connect({
