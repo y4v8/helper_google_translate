@@ -84,7 +84,7 @@ function eventKeyup(event) {
   }
 
   let data;
-  if (event.target.type == 'textarea') {
+  if (event.target.type == 'textarea' || event.target.type == 'input') {
     data = event.target.value.substring(event.target.selectionStart, event.target.selectionEnd).trim();
   } else {
     data = window.getSelection().toString().trim();
