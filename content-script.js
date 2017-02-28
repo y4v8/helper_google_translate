@@ -9,7 +9,7 @@ let translate = document.URL.startsWith(translateURL);
 let portBS = chrome.runtime.connect({
   name: portName
 });
-let eventTimeDown,
+let eventTimeDown = 0,
     eventKeyDown = false;
     
 if (translate) {
@@ -56,11 +56,13 @@ function initTranslator() {
 function eventKeydown(event) {
   if (event.key === eventKey) {
     if (eventKeyDown == false) {
+      // if (event.timeStamp - eventTimeDown < eventMaxDuration) { console.log('double press'); }
       eventTimeDown = event.timeStamp;
       eventKeyDown = true;
     }
     return;
   }
+  eventTimeDown = 0;
   eventKeyDown = false;
 }
 
@@ -73,10 +75,10 @@ function eventKeyup(event) {
   if (event.timeStamp - eventTimeDown > eventMaxDuration) {
     return;
   }
-  
+
   if (translate) {
     portBS.postMessage({
-      content: ''
+      switchToPreviousTab: true
     });
     return;
   }
@@ -87,11 +89,9 @@ function eventKeyup(event) {
   } else {
     data = window.getSelection().toString().trim();
   }
-  if (data != '') {
-    portBS.postMessage({
-      content: data
-    });
-  }
+  portBS.postMessage({
+    content: data
+  });
 }
 
 document.addEventListener('keydown', eventKeydown);

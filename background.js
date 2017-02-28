@@ -9,7 +9,7 @@ function translateTab(tabs, currentWindow, currentTab, callback) {
       active: true,
       index: currentTab.index + 1,
       url: translateURL,
-      windowId: currentWindow.index
+      windowId: currentWindow.id
     }, callback);
     return;
   }
@@ -41,7 +41,7 @@ function translateTab(tabs, currentWindow, currentTab, callback) {
 function postMessage(m) {
   chrome.windows.getCurrent(currentWindow => {
     chrome.tabs.query({
-      windowId: currentWindow.Id,
+      windowId: currentWindow.id,
       active: true
     }, activeTabs => {
       if (activeTabs.length == 0) {
@@ -65,7 +65,13 @@ function postMessage(m) {
           chrome.tabs.update(t.id, {
             active: true
           }, updateTab => {
-            chrome.tabs.sendMessage(updateTab.id, m);
+            chrome.windows.update(updateTab.windowId, {
+              focused: true
+            }, window => {
+              if (m.content != '') {
+                chrome.tabs.sendMessage(updateTab.id, m);
+              }
+            });
           });
         });
       });
@@ -78,14 +84,18 @@ function connected(p) {
     return;
   }
   p.onMessage.addListener(m => {
-    if (m.content != '') {
-      postMessage(m);
-    } else {
+    if ('switchToPreviousTab' in m) {
       if (lastContentTab != undefined) {
-        chrome.tabs.update(lastContentTab.id, {
-          active: true
+        chrome.windows.update(lastContentTab.windowId, {
+          focused: true
+        }, window => {
+          chrome.tabs.update(lastContentTab.id, {
+            active: true
+          });
         });
       }
+    } else {
+      postMessage(m);
     }
   });
 }
