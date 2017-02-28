@@ -84,7 +84,7 @@ function eventKeyup(event) {
   }
 
   let data;
-  if (event.target.type == 'textarea' || event.target.type == 'input') {
+  if (event.target.tagName == 'TEXTAREA' || event.target.tagName == 'INPUT') {
     data = event.target.value.substring(event.target.selectionStart, event.target.selectionEnd).trim();
   } else {
     data = window.getSelection().toString().trim();
@@ -97,7 +97,7 @@ function eventKeyup(event) {
 document.addEventListener('keydown', eventKeydown);
 document.addEventListener('keyup', eventKeyup);
 
-let elements = document.getElementsByTagName('textarea');
+let elements = document.getElementsByTagName('TEXTAREA');
 for (let i=0; i<elements.length; i++) {
   elements[i].addEventListener('keydown', eventKeydown);
   elements[i].addEventListener('keyup', eventKeyup);
@@ -106,13 +106,13 @@ for (let i=0; i<elements.length; i++) {
 let observer = new MutationObserver(function(mutations) {
   mutations.forEach(function(mutation) {
     mutation.addedNodes.forEach(function(node) {
-      if (node.type == 'textarea') {
+      if (node.tagName == 'TEXTAREA') {
         node.addEventListener('keydown', eventKeydown);
         node.addEventListener('keyup', eventKeyup);
       }
     });
     mutation.removedNodes.forEach(function(node) {
-      if (node.type == 'textarea') {
+      if (node.tagName == 'TEXTAREA') {
         node.removeEventListener('keydown', eventKeydown);
         node.removeEventListener('keyup', eventKeyup);
       }
