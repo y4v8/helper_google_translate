@@ -87,39 +87,43 @@ function eventKeyup(event) {
   if (event.target.tagName == 'TEXTAREA' || event.target.tagName == 'INPUT') {
     data = event.target.value.substring(event.target.selectionStart, event.target.selectionEnd).trim();
   } else {
-    data = window.getSelection().toString().trim();
+    data = event.target.ownerDocument.getSelection().toString().trim();
   }
   portBS.postMessage({
     content: data
   });
 }
 
-document.addEventListener('keydown', eventKeydown);
-document.addEventListener('keyup', eventKeyup);
+function keyEvents(doc) {
+  doc.addEventListener('keydown', eventKeydown);
+  doc.addEventListener('keyup', eventKeyup);
 
-let elements = document.getElementsByTagName('TEXTAREA');
-for (let i=0; i<elements.length; i++) {
-  elements[i].addEventListener('keydown', eventKeydown);
-  elements[i].addEventListener('keyup', eventKeyup);
+  let elements = doc.getElementsByTagName('TEXTAREA');
+  for (let i=0; i<elements.length; i++) {
+    elements[i].addEventListener('keydown', eventKeydown);
+    elements[i].addEventListener('keyup', eventKeyup);
+  }
+
+  let observer = new MutationObserver(function(mutations) {
+    mutations.forEach(function(mutation) {
+      mutation.addedNodes.forEach(function(node) {
+        if (node.tagName == 'TEXTAREA') {
+          node.addEventListener('keydown', eventKeydown);
+          node.addEventListener('keyup', eventKeyup);
+        }
+      });
+      mutation.removedNodes.forEach(function(node) {
+        if (node.tagName == 'TEXTAREA') {
+          node.removeEventListener('keydown', eventKeydown);
+          node.removeEventListener('keyup', eventKeyup);
+        }
+      });
+    });    
+  });
+
+  let config = { childList: true, subtree: true };
+
+  observer.observe(doc.body, config);
 }
 
-let observer = new MutationObserver(function(mutations) {
-  mutations.forEach(function(mutation) {
-    mutation.addedNodes.forEach(function(node) {
-      if (node.tagName == 'TEXTAREA') {
-        node.addEventListener('keydown', eventKeydown);
-        node.addEventListener('keyup', eventKeyup);
-      }
-    });
-    mutation.removedNodes.forEach(function(node) {
-      if (node.tagName == 'TEXTAREA') {
-        node.removeEventListener('keydown', eventKeydown);
-        node.removeEventListener('keyup', eventKeyup);
-      }
-    });
-  });    
-});
-
-let config = { childList: true, subtree: true };
-
-observer.observe(document.body, config);
+keyEvents(document);
