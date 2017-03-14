@@ -110,12 +110,18 @@ function keyEvents(doc) {
         if (node.tagName == 'TEXTAREA') {
           node.addEventListener('keydown', eventKeydown);
           node.addEventListener('keyup', eventKeyup);
+        } else if (node.tagName == 'FRAME' || node.tagName == 'IFRAME') {
+          node.contentWindow.document.addEventListener('keydown', eventKeydown);
+          node.contentWindow.document.addEventListener('keyup', eventKeyup);
         }
       });
       mutation.removedNodes.forEach(function(node) {
         if (node.tagName == 'TEXTAREA') {
           node.removeEventListener('keydown', eventKeydown);
           node.removeEventListener('keyup', eventKeyup);
+        } else if (node.tagName == 'FRAME' || node.tagName == 'IFRAME') {
+          node.contentWindow.document.removeEventListener('keydown', eventKeydown);
+          node.contentWindow.document.removeEventListener('keyup', eventKeyup);
         }
       });
     });    
@@ -127,3 +133,13 @@ function keyEvents(doc) {
 }
 
 keyEvents(document);
+
+elements = document.getElementsByTagName('FRAME');
+for (let i=0; i<elements.length; i++) {
+  keyEvents(elements[i].contentWindow.document);
+}
+
+elements = document.getElementsByTagName('IFRAME');
+for (let i=0; i<elements.length; i++) {
+  keyEvents(elements[i].contentWindow.document);
+}
