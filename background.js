@@ -68,9 +68,7 @@ function postMessage(m) {
             chrome.windows.update(updateTab.windowId, {
               focused: true
             }, window => {
-              if (m.content != '') {
-                chrome.tabs.sendMessage(updateTab.id, m);
-              }
+              chrome.tabs.sendMessage(updateTab.id, m);
             });
           });
         });

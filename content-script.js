@@ -44,9 +44,9 @@ function initTranslator() {
       return;
     }
 
-    content = msg.content;
-
-    source.value = msg.content;
+    if (msg.content != '') {
+        content = source.value = msg.content;
+    }
     source.style.height = 'auto';
     source.style.height = source.scrollHeight+'px';
     source.focus();
