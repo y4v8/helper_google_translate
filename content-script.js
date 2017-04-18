@@ -54,7 +54,7 @@ function initTranslator() {
 }
 
 function eventKeydown(event) {
-  if (event.key === eventKey) {
+  if (event.key === eventKey && !event.altKey && !event.shiftKey) {
     if (eventKeyDown == false) {
       // if (event.timeStamp - eventTimeDown < eventMaxDuration) { console.log('double press'); }
       eventTimeDown = event.timeStamp;
