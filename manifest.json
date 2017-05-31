@@ -1,7 +1,7 @@
 {
   "manifest_version": 2,
   "name": "Helper for Google Translate",
-  "version": "2.2.5",
+  "version": "2.2.6",
   "description": "To switch and translate, just press the CTRL key.",
   "homepage_url": "https://github.com/y4v8/helper_google_translate",
 

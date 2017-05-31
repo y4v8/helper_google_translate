@@ -1,3 +1,5 @@
+"use strict";
+
 const translateURL = 'https://translate.google.com/',
       portName = 'translate-port',
       contentSourceID = 'source',
@@ -83,45 +85,37 @@ function eventKeyup(event) {
     return;
   }
 
-  let data;
-  if (event.target.tagName == 'TEXTAREA' || event.target.tagName == 'INPUT') {
-    data = event.target.value.substring(event.target.selectionStart, event.target.selectionEnd).trim();
-  } else {
-    data = event.target.ownerDocument.getSelection().toString().trim();
-  }
   portBS.postMessage({
-    content: data
+    content: getSelectedText(event.target)
   });
+}
+
+function getSelectedText(target) {
+  let element = target instanceof Window ? target.document.body :
+                target instanceof HTMLDocument ? target.body : target;
+
+  if (element.tagName == "TEXTAREA" || element.tagName == "INPUT") {
+    return element.value.substring(element.selectionStart, element.selectionEnd).trim();
+  }
+  return element.ownerDocument.getSelection().toString().trim();
 }
 
 function keyEvents(doc) {
   doc.addEventListener('keydown', eventKeydown);
   doc.addEventListener('keyup', eventKeyup);
 
-  let elements = doc.getElementsByTagName('TEXTAREA');
-  for (let i=0; i<elements.length; i++) {
-    elements[i].addEventListener('keydown', eventKeydown);
-    elements[i].addEventListener('keyup', eventKeyup);
-  }
-
   let observer = new MutationObserver(function(mutations) {
     mutations.forEach(function(mutation) {
       mutation.addedNodes.forEach(function(node) {
-        if (node.tagName == 'TEXTAREA') {
-          node.addEventListener('keydown', eventKeydown);
-          node.addEventListener('keyup', eventKeyup);
-        } else if (node.tagName == 'FRAME' || node.tagName == 'IFRAME') {
-          node.contentWindow.document.addEventListener('keydown', eventKeydown);
-          node.contentWindow.document.addEventListener('keyup', eventKeyup);
+        if (node.tagName == 'FRAME' || node.tagName == 'IFRAME') {
+          node.contentWindow.addEventListener('keydown', eventKeydown);
+          node.contentWindow.addEventListener('keyup', eventKeyup);
         }
       });
       mutation.removedNodes.forEach(function(node) {
-        if (node.tagName == 'TEXTAREA') {
-          node.removeEventListener('keydown', eventKeydown);
-          node.removeEventListener('keyup', eventKeyup);
-        } else if (node.tagName == 'FRAME' || node.tagName == 'IFRAME') {
-          node.contentWindow.document.removeEventListener('keydown', eventKeydown);
-          node.contentWindow.document.removeEventListener('keyup', eventKeyup);
+        if (node.tagName == 'FRAME' || node.tagName == 'IFRAME') {
+          node.contentWindow.removeEventListener('keydown', eventKeydown);
+          node.contentWindow.removeEventListener('keyup', eventKeyup);
         }
       });
     });    
@@ -134,12 +128,6 @@ function keyEvents(doc) {
 
 keyEvents(document);
 
-elements = document.getElementsByTagName('FRAME');
-for (let i=0; i<elements.length; i++) {
-  keyEvents(elements[i].contentWindow.document);
-}
-
-elements = document.getElementsByTagName('IFRAME');
-for (let i=0; i<elements.length; i++) {
-  keyEvents(elements[i].contentWindow.document);
+for (let i=0; i<window.frames.length; i++) {
+  keyEvents(window.frames[i].document);
 }

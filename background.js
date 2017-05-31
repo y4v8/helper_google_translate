@@ -1,3 +1,5 @@
+"use strict";
+
 const translateURL = 'https://translate.google.com/',
       portName = 'translate-port';
 
